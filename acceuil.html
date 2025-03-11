@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accueil du jeu</title>
+</head>
+<body>
+  <h1>Bienvenue dans le jeu !</h1>
+
+  <!-- Formulaire d'inscription -->
+  <div>
+    <input type="text" id="team-name" placeholder="Nom de l'équipe" />
+    <button onclick="registerTeam()">S'enregistrer</button>
+  </div>
+
+  <!-- Message de feedback -->
+  <div id="message"></div>
+
+  <!-- Bouton pour commencer le jeu -->
+  <div>
+    <button onclick="startGame()">Commencer le jeu</button>
+  </div>
+
+  <script>
+    const API_URL = "https://escape-game-backend-71zo.onrender.com";
+    let currentTeamId = null;
+
+    // Appel /create_team pour enregistrer l'équipe
+    async function registerTeam() {
+      const nameInput = document.getElementById("team-name");
+      const messageDiv = document.getElementById("message");
+
+      const teamName = nameInput.value.trim();
+      if (!teamName) {
+        messageDiv.innerText = "Veuillez entrer un nom d'équipe.";
+        messageDiv.style.color = "red";
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/create_team`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: teamName })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          messageDiv.style.color = "green";
+          messageDiv.innerText = data.message;
+          // On stocke l'id de l'équipe pour la suite
+          currentTeamId = data.team_id;
+        } else {
+          messageDiv.style.color = "red";
+          messageDiv.innerText = data.error || "Erreur lors de l'enregistrement.";
+        }
+      } catch (error) {
+        console.error(error);
+        messageDiv.style.color = "red";
+        messageDiv.innerText = "Erreur de connexion à l'API.";
+      }
+    }
+
+    // Bouton "Commencer le jeu"
+    function startGame() {
+      if (!currentTeamId) {
+        alert("Veuillez d'abord enregistrer votre équipe !");
+        return;
+      }
+      // Redirige vers etape1.html avec l'id de l'équipe
+      window.location.href = `etape1.html?team_id=${currentTeamId}`;
+    }
+  </script>
+</body>
+</html>
