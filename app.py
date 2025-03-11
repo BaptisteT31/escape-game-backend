@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 # --- Configuration PostgreSQL ---
-DB_HOST = os.getenv("DB_HOST", "dpg-cutkc1d6l47c73a6kntg-a")
+DB_HOST = os.getenv("DB_HOST", "dpg-cutkc1d6l47c73a6kntg-a.oregon-postgres.render.com")
 DB_NAME = os.getenv("DB_NAME", "escape_game_db")
 DB_USER = os.getenv("DB_USER", "escape_game_db_user")
 DB_PASS = os.getenv("DB_PASS", "0mPOqxzc51tk0GCtyJH2kAx7dDugHbEp")
