@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Enregistrement des équipes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #team-form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 250px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #team-list {
+            margin-top: 30px;
+            text-align: left;
+            display: inline-block;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .team-item {
+            padding: 5px 0;
+            font-size: 18px;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Enregistrement des équipes</h1>
+
+    <div id="team-form">
+        <input type="text" id="team-name" placeholder="Nom de l'équipe" required>
+        <button onclick="registerTeam()">S'inscrire</button>
+    </div>
+
+    <div id="message"></div>
+
+    <div id="team-list">
+        <h2>Équipes enregistrées :</h2>
+        <div id="teams"></div>
+    </div>
+
+    <script>
+        const API_URL = "https://escape-game-backend-71zo.onrender.com";
+
+        // Fonction pour enregistrer une équipe
+        async function registerTeam() {
+            const teamName = document.getElementById("team-name").value.trim();
+            const messageDiv = document.getElementById("message");
+
+            if (!teamName) {
+                messageDiv.style.color = "red";
+                messageDiv.innerText = "Veuillez entrer un nom d'équipe.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/create_team`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ name: teamName })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.style.color = "green";
+                    messageDiv.innerText = data.message;
+                    document.getElementById("team-name").value = "";
+                    fetchTeams(); // Met à jour la liste
+                } else {
+                    messageDiv.style.color = "red";
+                    messageDiv.innerText = data.error || "Erreur lors de l'enregistrement.";
+                }
+
+            } catch (error) {
+                messageDiv.style.color = "red";
+                messageDiv.innerText = "Erreur de connexion au serveur.";
+            }
+        }
+
+        // Fonction pour récupérer et afficher la liste des équipes
+        async function fetchTeams() {
+            try {
+                const response = await fetch(`${API_URL}/get_scores`);
+                const data = await response.json();
+
+                const teamsDiv = document.getElementById("teams");
+                teamsDiv.innerHTML = "";
+
+                data.teams.forEach(team => {
+                    const teamItem = document.createElement("div");
+                    teamItem.className = "team-item";
+                    teamItem.innerText = `${team.name} (Score: ${team.score}, Temps: ${team.time_elapsed}s)`;
+                    teamsDiv.appendChild(teamItem);
+                });
+
+            } catch (error) {
+                console.error("Erreur lors de la récupération des équipes:", error);
+            }
+        }
+
+        // Actualise la liste toutes les 5 secondes
+        setInterval(fetchTeams, 5000);
+
+        // Récupère les équipes au chargement
+        window.onload = fetchTeams;
+
+    </script>
+
+</body>
+</html>
