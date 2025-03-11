@@ -14,7 +14,6 @@ DB_USER = os.getenv("DB_USER", "escape_game_db_user")
 DB_PASS = os.getenv("DB_PASS", "0mPOqxzc51tk0GCtyJH2kAx7dDugHbEp")
 DB_PORT = os.getenv("DB_PORT", "5432")
 
-# --- Fonction pour se connecter à la base ---
 def get_db_connection():
     """
     Ouvre une connexion à PostgreSQL en utilisant les variables d'environnement.
@@ -34,7 +33,6 @@ def get_db_connection():
         print("❌ Erreur de connexion à PostgreSQL :", e)
         return None
 
-# --- Initialisation de la base de données ---
 def init_db():
     conn = get_db_connection()
     if conn is None:
@@ -56,18 +54,8 @@ def init_db():
     conn.close()
     print("✅ Base de données initialisée (table teams).")
 
-@app.before_first_request
-def log_routes():
-    """
-    Au premier appel, on affiche la liste des routes chargées
-    pour faciliter le debug dans les logs Render.
-    """
-    routes = [rule.rule for rule in app.url_map.iter_rules()]
-    print("✅ Routes Flask disponibles :", routes)
 
-init_db()
-
-# --- Route pour créer une équipe ---
+# --- ROUTES FLASK ---
 @app.route('/create_team', methods=['POST'])
 def create_team():
     data = request.get_json()
@@ -90,7 +78,6 @@ def create_team():
 
     return jsonify({'message': f"Équipe {team_name} créée avec succès!", 'team_id': team_id}), 201
 
-# --- Route pour obtenir le statut d'une équipe ---
 @app.route('/get_team_status', methods=['GET'])
 def get_team_status():
     team_id = request.args.get('team_id')
@@ -121,7 +108,6 @@ def get_team_status():
         'completed': completed
     })
 
-# --- Route pour valider une étape ---
 @app.route('/validate_step', methods=['POST'])
 def validate_step():
     data = request.get_json()
@@ -156,7 +142,6 @@ def validate_step():
 
     return jsonify({'message': "Étape validée.", 'next_step': current_step + 1})
 
-# --- Route pour récupérer les scores et progression des équipes (Page Spectateur) ---
 @app.route('/get_spectator_data', methods=['GET'])
 def get_spectator_data():
     conn = get_db_connection()
@@ -183,8 +168,16 @@ def get_spectator_data():
 
     return jsonify({'teams': teams_data})
 
-# --- Point d'entrée principal ---
+
+def log_flask_routes():
+    """Affiche les routes de l'application pour le debug."""
+    routes = [rule.rule for rule in app.url_map.iter_rules()]
+    print("✅ Routes Flask disponibles :", routes)
+
+
+# --- MAIN ---
 if __name__ == '__main__':
-    # Render définit parfois la variable PORT, sinon on prend 10000
+    init_db()  # Initialise la base
+    log_flask_routes()  # Loggue les routes
     port = int(os.getenv("PORT", "10000"))
     app.run(host="0.0.0.0", port=port)
