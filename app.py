@@ -137,6 +137,22 @@ def get_spectator_data():
 
     return jsonify({'teams': teams_data})
 
+def get_db_connection():
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASS,
+            port=DB_PORT
+        )
+        print("✅ Connexion à PostgreSQL réussie !")
+        return conn
+    except psycopg2.OperationalError as e:
+        print("❌ Erreur de connexion à PostgreSQL :", e)
+        return None
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=10000)
 
