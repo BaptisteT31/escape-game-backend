@@ -138,4 +138,5 @@ def get_spectator_data():
     return jsonify({'teams': teams_data})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
+
